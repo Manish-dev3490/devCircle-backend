@@ -1,33 +1,58 @@
-const express = require('express');
-const connectDB = require('./config/database');
-const User = require('./models/user')
+const express = require("express");
+const connectDB = require("./config/database");
+const User = require("./models/user");
 const app = express();
-
 
 app.use(express.json());
 
-app.post("/signup", async (req, res) => {
-    const dataobj = new User(req.body)
+// find one user with email id
+app.get("/user", async (req, res) => {
+  try {
+    const user = await User.findOne({
+      email: req.body.email,
+    });
 
-    try {
-        await dataobj.save();
-        res.send("User created successfully");
+    if (!user) {
+      return res.status(404).send("User not found");
     }
-    catch (error) {
-        res.status(400).send(error.message);
-    }
+
+    res.send(user);
+  } catch (error) {
+    res.status(500).send("Something went wrong: " + error.message);
+  }
 });
 
+// post api for signup new user into database
+app.post("/signup", async (req, res) => {
+  const dataobj = new User(req.body);
+
+  try {
+    await dataobj.save();
+    res.send("User created successfully");
+  } catch (error) {
+    res.status(400).send(error.message);
+  }
+});
+
+// api to find all users in users colleection
+app.get("/feed",async(req,res)=>{
+    try{
+        const feed=await User.find({});
+        res.send(feed);
+        console.log(feed);
+    }
+    catch(error){
+        res.status(404).send("something went wrong"+error)
+    }
+})
 
 connectDB()
-    .then(() => {
-        console.log("successfully connected with cluster");
-        app.listen(3000, () => {
-            console.log("i am listning on the prot 3000");
-        })
-    })
-    .catch((error) => {
-        console.log(("your connection is not established because of " + error));
-    })
-
-
+  .then(() => {
+    console.log("successfully connected with cluster");
+    app.listen(3000, () => {
+      console.log("i am listning on the port 3000");
+    });
+  })
+  .catch((error) => {
+    console.log("your connection is not established because of " + error);
+  });
