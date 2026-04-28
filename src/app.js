@@ -15,9 +15,13 @@ app.post("/signup", async (req, res) => {
         address: "delhi"
     };
 
-    await User.create(dataobj);
-
-    res.send("User created successfully");
+    try {
+        await User.create(dataobj);
+        res.send("User created successfully");
+    }
+    catch (error) {
+        res.send("something is wrong ", error)
+    }
 });
 
 
