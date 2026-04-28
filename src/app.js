@@ -4,23 +4,17 @@ const User = require('./models/user')
 const app = express();
 
 
+app.use(express.json());
 
 app.post("/signup", async (req, res) => {
-    const dataobj = {
-        firstName: "manish",
-        lastName: "kumar",
-        age: 22,
-        email: "manish@gmail.com",
-        password: "1234556789",
-        address: "delhi"
-    };
+    const dataobj = new User(req.body)
 
     try {
-        await User.create(dataobj);
+        await dataobj.save();
         res.send("User created successfully");
     }
     catch (error) {
-        res.send("something is wrong ", error)
+        res.status(400).send(error.message);
     }
 });
 
