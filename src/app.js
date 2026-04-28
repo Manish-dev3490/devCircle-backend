@@ -1,6 +1,24 @@
 const express = require('express');
 const connectDB = require('./config/database');
+const User = require('./models/user')
 const app = express();
+
+
+
+app.post("/signup", async (req, res) => {
+    const dataobj = {
+        firstName: "manish",
+        lastName: "kumar",
+        age: 22,
+        email: "manish@gmail.com",
+        password: "1234556789",
+        address: "delhi"
+    };
+
+    await User.create(dataobj);
+
+    res.send("User created successfully");
+});
 
 
 connectDB()
