@@ -22,6 +22,7 @@ app.get("/user", async (req, res) => {
   }
 });
 
+
 // post api for signup new user into database
 app.post("/signup", async (req, res) => {
   const dataobj = new User(req.body);
@@ -34,16 +35,42 @@ app.post("/signup", async (req, res) => {
   }
 });
 
+
 // api to find all users in users colleection
-app.get("/feed",async(req,res)=>{
-    try{
-        const feed=await User.find({});
-        res.send(feed);
-        console.log(feed);
-    }
-    catch(error){
-        res.status(404).send("something went wrong"+error)
-    }
+app.get("/feed", async (req, res) => {
+  try {
+    const feed = await User.find({});
+    res.send(feed);
+    console.log(feed);
+  }
+  catch (error) {
+    res.status(404).send("something went wrong" + error)
+  }
+})
+
+
+// api to delete a user from database
+app.delete("/user", async (req, res) => {
+  
+  try {
+    await User.findByIdAndDelete({_id:req.body._id});
+    res.send("user is deleted");
+  }
+  catch (error) {
+    res.status(404).send("something went wrong " + error);
+  }
+})
+
+
+// api to update a particular user by  his details
+app.patch("/user",async(req,res)=>{
+  try{
+     await User.findByIdAndUpdate({_id:req.body._id},{firstName:req.body.firstName,email:req.body.email});
+     res.send("user is updated");
+  }
+  catch(error){
+    res.status(404).send("something went wrong"+error);
+  }
 })
 
 connectDB()
