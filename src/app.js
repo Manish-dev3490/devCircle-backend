@@ -1,6 +1,8 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const validate = require('./helper/validation');
+const bcrypt = require('bcrypt');
 const app = express();
 
 app.use(express.json());
@@ -25,10 +27,22 @@ app.get("/user", async (req, res) => {
 
 // post api for signup new user into database
 app.post("/signup", async (req, res) => {
-  
 
   try {
-    await User.create(req.body);
+    // validate the data at the api level validation
+    validate.validateSignUpAPI(req);
+
+    // encrypting the password with bcrypt library
+    const {firstName,lastName,email,password}=req.body;
+    const hashPassword=await bcrypt.hash(password,10);
+
+    const newClient=new User({
+      firstName,
+      lastName,
+      email,
+      password:hashPassword
+    });
+    await newClient.save();
     res.send("User created successfully");
   } catch (error) {
     res.status(400).send(error.message);
@@ -51,9 +65,9 @@ app.get("/feed", async (req, res) => {
 
 // api to delete a user from database
 app.delete("/user", async (req, res) => {
-  
+
   try {
-    await User.findByIdAndDelete({_id:req.body._id});
+    await User.findByIdAndDelete({ _id: req.body._id });
     res.send("user is deleted");
   }
   catch (error) {
@@ -63,13 +77,13 @@ app.delete("/user", async (req, res) => {
 
 
 // api to update a particular user by  his details
-app.patch("/user",async(req,res)=>{
-  try{
-     await User.findByIdAndUpdate({_id:req.body._id},{firstName:req.body.firstName,email:req.body.email},{runValidators:true});
-     res.send("user is updated");
+app.patch("/user", async (req, res) => {
+  try {
+    await User.findByIdAndUpdate({ _id: req.body._id }, { firstName: req.body.firstName, email: req.body.email }, { runValidators: true });
+    res.send("user is updated");
   }
-  catch(error){
-    res.status(404).send("something went wrong"+error);
+  catch (error) {
+    res.status(404).send("something went wrong" + error);
   }
 })
 

@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const validator = require('validator');
+
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -18,7 +20,7 @@ const userSchema = new mongoose.Schema({
         type: Number,
         min: 18,
         max: 60,
-        
+
     },
     email: {
         type: String,
@@ -27,26 +29,31 @@ const userSchema = new mongoose.Schema({
         minLength: 13,
         maxLength: 50,
         trim: true,
-        lowercase:true
+        lowercase: true,
+        validate(value) {
+            if (!validator.isEmail(value)) {
+                throw new Error("your email is invalid:" + value);
+            }
+        }
 
     },
     password: {
         type: String,
         required: true,
         minLength: 6,
-        maxLength: 25,
+        maxLength: 100,
         trim: true
 
     },
     address: {
         type: String,
-        required: true,
+       
         trim: true
 
     },
     gender: {
         type: String,
-        required: true,
+        
         validate(value) {
             if (!["male", "female", "others"].includes(value)) {
                 throw new Error("your gender is not valid");
@@ -55,7 +62,12 @@ const userSchema = new mongoose.Schema({
     },
     photo: {
         type: String,
-        default: "https://thumbs.dreamstime.com/b/avatar-man-icon-profile-placeholder-anonymous-user-male-gray-person-identity-373371403.jpg?w=768"
+        default: "https://thumbs.dreamstime.com/b/avatar-man-icon-profile-placeholder-anonymous-user-male-gray-person-identity-373371403.jpg?w=768",
+        validate(value) {
+            if (!validator.isURL(value)) {
+                throw new Error("your photo url is invalid:" + value);
+            }
+        }
     }
 }, { timestamps: true });
 
