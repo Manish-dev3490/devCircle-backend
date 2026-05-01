@@ -25,10 +25,10 @@ app.get("/user", async (req, res) => {
 
 // post api for signup new user into database
 app.post("/signup", async (req, res) => {
-  const dataobj = new User(req.body);
+  
 
   try {
-    await dataobj.save();
+    await User.create(req.body);
     res.send("User created successfully");
   } catch (error) {
     res.status(400).send(error.message);
@@ -65,7 +65,7 @@ app.delete("/user", async (req, res) => {
 // api to update a particular user by  his details
 app.patch("/user",async(req,res)=>{
   try{
-     await User.findByIdAndUpdate({_id:req.body._id},{firstName:req.body.firstName,email:req.body.email});
+     await User.findByIdAndUpdate({_id:req.body._id},{firstName:req.body.firstName,email:req.body.email},{runValidators:true});
      res.send("user is updated");
   }
   catch(error){
