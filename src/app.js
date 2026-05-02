@@ -28,7 +28,7 @@ app.get("/user", async (req, res) => {
 app.post("/signup", async (req, res) => {
   try {
     // validate the data at the api level validation
-    validate.validateSignUpAPI(req);
+   await validate.validateSignUpAPI(req);
 
     // encrypting the password with bcrypt library
     const { firstName, lastName, email, password } = req.body;
@@ -103,6 +103,34 @@ app.patch("/user", async (req, res) => {
     res.status(404).send("something went wrong" + error);
   }
 });
+
+
+// login api to login user
+app.post("/login", async (req, res) => {
+    try {
+       validate.validateLoginAPI(req);
+
+        const { email, password } = req.body;
+
+        // check user exist
+        const user = await User.findOne({ email });
+        if (!user) {
+            throw new Error("Invalid credentials");
+        }
+
+        // compare password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw new Error("Invalid credentials");
+        }
+
+        res.send("Login Successfully");
+
+    } catch (error) {
+        res.status(401).send(error.message);
+    }
+});
+
 
 connectDB()
   .then(() => {

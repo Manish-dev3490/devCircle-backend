@@ -1,12 +1,19 @@
 const validator = require('validator');
+const User = require('../models/user')
 
+async function validateSignUpAPI(req) {
 
-function validateSignUpAPI(req) {
+    const { firstName, lastName, email, password, age } = req.body;
 
-    const { firstName, lastName, email, password ,age} = req.body;
+    const first = firstName?.trim();
+    const last = lastName?.trim();
 
-    if (!firstName || !lastName) throw new Error("please enter your name");
-    if (!(firstName.length >= 3 && firstName.length <= 50) || !(lastName.length >= 3 && lastName.length <= 50)) {
+    if (!first || !last) {
+        throw new Error("please enter your name properly");
+    }
+
+    if (first.length < 3 || first.length > 50 ||
+        last.length < 3 || last.length > 50) {
         throw new Error("please check length of your name properly");
     }
 
@@ -14,11 +21,28 @@ function validateSignUpAPI(req) {
         throw new Error("please enter the valid email");
     }
 
-    if (!validator.isStrongPassword(password)) throw new Error("please eneter the strong password");
+    // 👉 ye hamesha chalega agar email valid hai
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+        throw new Error("user email already exists");
+    }
+    if (!validator.isStrongPassword(password)) throw new Error("please enter the strong password");
 }
 
+function validateLoginAPI(req) {
 
+    const { email, password } = req.body;
+    if (!email) throw new Error("please enter the email");
 
-module.exports={
-    validateSignUpAPI
+    if (!password) throw new Error("please enter the  password");
+
+    if (!validator.isEmail(email)) {
+        throw new Error("please enter the valid email");
+    }
+
+}
+
+module.exports = {
+    validateSignUpAPI,
+    validateLoginAPI
 }
