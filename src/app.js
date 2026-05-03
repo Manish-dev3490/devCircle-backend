@@ -3,6 +3,7 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const validate = require("./helper/validation");
 const bcrypt = require("bcrypt");
+const mongoose=require("mongoose");
 const app = express();
 
 app.use(express.json());
@@ -28,7 +29,7 @@ app.get("/user", async (req, res) => {
 app.post("/signup", async (req, res) => {
   try {
     // validate the data at the api level validation
-   await validate.validateSignUpAPI(req);
+    await validate.validateSignUpAPI(req);
 
     // encrypting the password with bcrypt library
     const { firstName, lastName, email, password } = req.body;
@@ -41,7 +42,7 @@ app.post("/signup", async (req, res) => {
       password: hashPassword,
     });
     await newClient.save();
-    res.send("User created successfully");
+    res.status(201).send("User created successfully");
   } catch (error) {
     res.status(400).send(error.message);
   }
@@ -50,9 +51,8 @@ app.post("/signup", async (req, res) => {
 // api to find all users in users colleection
 app.get("/feed", async (req, res) => {
   try {
-    const feed = await User.find({});
-    res.send(feed);
-    console.log(feed);
+    const feed = await User.find({}).select("-password");
+    res.status(200).send(feed);
   } catch (error) {
     res.status(404).send("something went wrong" + error);
   }
@@ -70,7 +70,7 @@ app.delete("/user/:id", async (req, res) => {
     }
 
     // ✅ check valid MongoDB id format
-    const isValidId = require("mongoose").Types.ObjectId.isValid(id);
+    const isValidId = mongoose.Types.ObjectId.isValid(id);
     if (!isValidId) {
       return res.status(400).send("Invalid user id");
     }
@@ -93,12 +93,15 @@ app.delete("/user/:id", async (req, res) => {
 // api to update a particular user by  his details
 app.patch("/user", async (req, res) => {
   try {
+
+     const existingUser=await validate.validateUserPatchApi(req);
+     const{_id,firstName,lastName,email}=req.body;
     await User.findByIdAndUpdate(
-      { _id: req.body._id },
-      { firstName: req.body.firstName, email: req.body.email },
+      { _id },
+      { firstName, email,lastName},
       { runValidators: true },
     );
-    res.send("user is updated");
+    res.status(200).send("user is updated");
   } catch (error) {
     res.status(404).send("something went wrong" + error);
   }
@@ -107,28 +110,28 @@ app.patch("/user", async (req, res) => {
 
 // login api to login user
 app.post("/login", async (req, res) => {
-    try {
-       validate.validateLoginAPI(req);
+  try {
+    validate.validateLoginAPI(req);
 
-        const { email, password } = req.body;
+    const { email, password } = req.body;
 
-        // check user exist
-        const user = await User.findOne({ email });
-        if (!user) {
-            throw new Error("Invalid credentials");
-        }
-
-        // compare password
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            throw new Error("Invalid credentials");
-        }
-
-        res.send("Login Successfully");
-
-    } catch (error) {
-        res.status(401).send(error.message);
+    // check user exist
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new Error("Invalid credentials");
     }
+
+    // compare password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      throw new Error("Invalid credentials");
+    }
+
+    res.status(200).send("Login Successfully");
+
+  } catch (error) {
+    res.status(401).send(error.message);
+  }
 });
 
 
