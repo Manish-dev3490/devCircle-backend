@@ -6,6 +6,7 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const jsonwebtoken = require('jsonwebtoken')
+const authValidator=require('./middlewares/auth')
 const app = express();
 
 app.use(cookieParser());
@@ -77,29 +78,9 @@ app.post("/login", async (req, res) => {
 
 
 // api to profile
-app.get("/profile", async (req, res) => {
+app.get("/profile", authValidator,async (req, res) => {
   try {
-    const cookies=req.cookies;
-    console.log(cookies);
-    
-    const token = cookies.token;
-
-    if (!token) {
-      return res.status(401).send("Unauthorized");
-    }
-
-    // ✅ verify token
-    const decoded = jsonwebtoken.verify(token, "$foobar$");
-
-    // ✅ get user from DB
-    const user = await User.findById(decoded.userId).select("-password");
-
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    res.status(200).send(user);
-
+    res.status(200).send(req.user);
   } catch (error) {
     res.status(401).send("Invalid token");
   }
