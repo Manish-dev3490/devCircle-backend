@@ -37,9 +37,11 @@ function validateLoginAPI(req) {
 
     if (!password) throw new Error("please enter the  password");
 
+    
     if (!validator.isEmail(email)) {
         throw new Error("please enter the valid email");
     }
+
 
 }
 
@@ -53,6 +55,7 @@ async function validateUserPatchApi(req){
         throw new Error("this user does not exist ");
     }
 
+    
 
 
 }

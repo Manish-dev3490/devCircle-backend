@@ -3,27 +3,14 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const validate = require("./helper/validation");
 const bcrypt = require("bcrypt");
-const mongoose=require("mongoose");
+const mongoose = require("mongoose");
+const cookieParser = require("cookie-parser");
+const jsonwebtoken = require('jsonwebtoken')
 const app = express();
 
+app.use(cookieParser());
 app.use(express.json());
 
-// find one user with email id
-app.get("/user", async (req, res) => {
-  try {
-    const { email } = req.query;
-    if (!email) {
-      return res.status(400).send("Email query param is required");
-    }
-    const user = await User.findOne({ email }).select("-password");
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-    res.status(200).send(user);
-  } catch (error) {
-    res.status(500).send("Something went wrong: " + error.message);
-  }
-});
 
 // post api for signup new user into database
 app.post("/signup", async (req, res) => {
@@ -48,65 +35,6 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-// api to find all users in users colleection
-app.get("/feed", async (req, res) => {
-  try {
-    const feed = await User.find({}).select("-password");
-    res.status(200).send(feed);
-  } catch (error) {
-    res.status(404).send("something went wrong" + error);
-  }
-});
-
-
-// api to delete a user by id
-app.delete("/user/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    // ✅ check if id is provided
-    if (!id) {
-      return res.status(400).send("User id is required");
-    }
-
-    // ✅ check valid MongoDB id format
-    const isValidId = mongoose.Types.ObjectId.isValid(id);
-    if (!isValidId) {
-      return res.status(400).send("Invalid user id");
-    }
-
-    // ✅ check if user exists
-    const user = await User.findById(id);
-    if (!user) {
-      return res.status(404).send("User not found");
-    }
-
-    // ✅ delete user
-    await User.findByIdAndDelete(id);
-
-    res.status(200).send("User deleted successfully");
-  } catch (error) {
-    res.status(500).send("Something went wrong: " + error.message);
-  }
-});
-
-// api to update a particular user by  his details
-app.patch("/user", async (req, res) => {
-  try {
-
-     const existingUser=await validate.validateUserPatchApi(req);
-     const{_id,firstName,lastName,email}=req.body;
-    await User.findByIdAndUpdate(
-      { _id },
-      { firstName, email,lastName},
-      { runValidators: true },
-    );
-    res.status(200).send("user is updated");
-  } catch (error) {
-    res.status(404).send("something went wrong" + error);
-  }
-});
-
 
 // login api to login user
 app.post("/login", async (req, res) => {
@@ -127,10 +55,53 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid credentials");
     }
 
-    res.status(200).send("Login Successfully");
+    else {
+      const token = jsonwebtoken.sign(
+        { _id: user._id },
+        "$foobar$"
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "lax",
+      });
+      res.status(200).send("Login Successfully");
+    }
+
+
 
   } catch (error) {
     res.status(401).send(error.message);
+  }
+});
+
+
+// api to profile
+app.get("/profile", async (req, res) => {
+  try {
+    const cookies=req.cookies;
+    console.log(cookies);
+    
+    const token = cookies.token;
+
+    if (!token) {
+      return res.status(401).send("Unauthorized");
+    }
+
+    // ✅ verify token
+    const decoded = jsonwebtoken.verify(token, "$foobar$");
+
+    // ✅ get user from DB
+    const user = await User.findById(decoded.userId).select("-password");
+
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    res.status(200).send(user);
+
+  } catch (error) {
+    res.status(401).send("Invalid token");
   }
 });
 
