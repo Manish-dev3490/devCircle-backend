@@ -57,10 +57,7 @@ app.post("/login", async (req, res) => {
     }
 
     else {
-      const token = jsonwebtoken.sign(
-        { _id: user._id },
-        "$foobar$"
-      );
+      const token = await user.getJwt();
 
       res.cookie("token", token, {
         httpOnly: true,
