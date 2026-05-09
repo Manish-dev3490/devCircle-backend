@@ -37,7 +37,7 @@ function validateLoginAPI(req) {
 
     if (!password) throw new Error("please enter the  password");
 
-    
+
     if (!validator.isEmail(email)) {
         throw new Error("please enter the valid email");
     }
@@ -45,17 +45,17 @@ function validateLoginAPI(req) {
 
 }
 
-async function validateUserPatchApi(req){
-    const{_id,email}=req.body;
-    if(!_id)throw new Error("please send the id of user you want to update");
+async function validateUserPatchApi(req) {
+    const { _id, email } = req.body;
+    if (!_id) throw new Error("please send the id of user you want to update");
     const properEmail = email?.trim();
-    if(!(properEmail && validator.isEmail(properEmail)))throw new Error("your email is not valid");
+    if (!(properEmail && validator.isEmail(properEmail))) throw new Error("your email is not valid");
     const existingUser = await User.findOne({ email });
     if (!existingUser) {
         throw new Error("this user does not exist ");
     }
 
-    
+
 
 
 }
