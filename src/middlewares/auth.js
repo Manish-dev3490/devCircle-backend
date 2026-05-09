@@ -1,22 +1,25 @@
-const jwt=require('jsonwebtoken');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
- async function authValidation(req,res,next){
+async function authValidation(req, res, next) {
 
-    try{
-        const {token}=req.cookies;
-        if(!token)throw new Error("token is not present");
-        const isAllowed=jwt.verify(token,"$foobar$");
-        const user=await User.findById(isAllowed._id);
-        if(!user)throw new Error("user is not present in db");
-        req.user=user;
-        next();
+    try {
+        const { token } = req.cookies;
+        if (!token) throw new Error("token is not present you need to login again");
+        const isAllowed = jwt.verify(token, "$foobar$");
+        if (isAllowed?._id) {
+            const user = await User.findById(isAllowed._id);
+            if (!user) throw new Error("user is not present in database");
+            req.user = user;
+            next();
+        }
+        else throw Error("token is not verified")
 
     }
 
-    catch(error){
-        res.status(401).send("something went wrong"+error);
+    catch (error) {
+        res.status(401).send("something went wrong " + error.message);
     }
- }
+}
 
 
- module.exports=authValidation
+module.exports = authValidation
