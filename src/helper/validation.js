@@ -45,22 +45,94 @@ function validateLoginAPI(req) {
 
 }
 
-async function validateUserPatchApi(req) {
-    const { _id, email } = req.body;
-    if (!_id) throw new Error("please send the id of user you want to update");
-    const properEmail = email?.trim();
-    if (!(properEmail && validator.isEmail(properEmail))) throw new Error("your email is not valid");
-    const existingUser = await User.findOne({ email });
-    if (!existingUser) {
-        throw new Error("this user does not exist ");
+async function validateProfileEditApi(req) {
+    const allowedUpdates = [
+        "firstName",
+        "lastName",
+        "age",
+        "gender",
+        "photo",
+        "address",
+    ];
+
+    // ✅ check only allowed fields are updated
+    const isAllowed = Object.keys(req.body).every((field) =>
+        allowedUpdates.includes(field)
+    );
+
+    if (!isAllowed) {
+        throw new Error("You cannot update email or password");
     }
 
+    const {
+        firstName,
+        lastName,
+        age,
+        gender,
+        photo,
+        address,
+    } = req.body;
 
+    // ✅ firstName validation
+    if (firstName !== undefined) {
+        if (
+            typeof firstName !== "string" ||
+            firstName.trim().length < 3 ||
+            firstName.trim().length > 50
+        ) {
+            throw new Error("First name should be between 3 to 50 characters");
+        }
+    }
 
+    // ✅ lastName validation
+    if (lastName !== undefined) {
+        if (
+            typeof lastName !== "string" ||
+            lastName.trim().length < 3 ||
+            lastName.trim().length > 50
+        ) {
+            throw new Error("Last name should be between 3 to 50 characters");
+        }
+    }
 
+    // ✅ age validation
+    if (age !== undefined) {
+        if (typeof age !== "number" || age < 18 || age > 70) {
+            throw new Error("Please enter a valid age");
+        }
+    }
+
+    // ✅ gender validation
+    if (gender !== undefined) {
+        const validGenders = ["male", "female", "others"];
+
+        if (!validGenders.includes(gender.toLowerCase())) {
+            throw new Error("Please enter a valid gender");
+        }
+    }
+
+    // ✅ photo validation
+    if (photo !== undefined) {
+        if (!validator.isURL(photo)) {
+            throw new Error("Photo should be a valid URL");
+        }
+    }
+
+    // ✅ address validation
+    if (address !== undefined) {
+        if (
+            typeof address !== "string" ||
+            address.trim().length < 5 ||
+            address.trim().length > 200
+        ) {
+            throw new Error("Please enter a valid address");
+        }
+    }
 }
+
+
 module.exports = {
     validateSignUpAPI,
     validateLoginAPI,
-    validateUserPatchApi
+    validateProfileEditApi
 }
