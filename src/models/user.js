@@ -48,13 +48,13 @@ const userSchema = new mongoose.Schema({
     },
     address: {
         type: String,
-       
+
         trim: true
 
     },
     gender: {
         type: String,
-        
+
         validate(value) {
             if (!["male", "female", "others"].includes(value)) {
                 throw new Error("your gender is not valid");
@@ -73,13 +73,18 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
-userSchema.methods.getJwt= async function(){
-    const user=this;
-    const token=jsonwebtoken.sign(
-            { _id: user._id },
-            "$foobar$"
-          );
-          return token;
+userSchema.methods.getJwt = async function () {
+    const user = this;
+
+    const token = jsonwebtoken.sign(
+        { _id: user._id },
+        "$foobar$",
+        {
+            expiresIn: "3d"
+        }
+    );
+
+    return token;
 }
 
 const User = mongoose.model("User", userSchema);

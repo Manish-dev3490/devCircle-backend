@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 const app = express();
 const authRouter = require('./routes/authRouter')
 const profileRouter = require('./routes/profileRouter')
+const redisClient = require('./config/redis');
 
 
 
@@ -15,13 +16,24 @@ app.use("/", profileRouter);
 
 
 
-connectDB()
-  .then(() => {
-    console.log("successfully connected with cluster");
-    app.listen(3000, () => {
-      console.log("i am listning on the port 3000");
-    });
-  })
-  .catch((error) => {
-    console.log("your connection is not established because of " + error);
-  });
+async function initializeConnection() {
+
+  try {
+    await connectDB();
+    console.log("connected with mongoDb cluster");
+
+    await redisClient.connect();
+    console.log("connected with redis database");
+
+      app.listen(3000, () => {
+      console.log("server is listening on the port 3000");
+    })
+
+  }
+  catch (error) {
+    console.log("something went wrong " + error.message);
+
+  }
+}
+
+initializeConnection();

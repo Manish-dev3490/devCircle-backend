@@ -3,6 +3,11 @@ const authRouter = express.Router();
 const bcrypt = require("bcrypt");
 const User = require("../models/user");
 const validate = require("../helper/validation");
+const authValidation = require('../middlewares/auth');
+const redisClient = require('../config/redis');
+const jwt = require('jsonwebtoken');
+
+
 
 // post api for signup new user into database
 authRouter.post("/signup", async (req, res) => {
@@ -62,7 +67,12 @@ authRouter.post("/login", async (req, res) => {
 
 
 // logout api to logout the user
-authRouter.post("/logout", async (req, res) => {
+authRouter.post("/logout", authValidation, async (req, res) => {
+
+    const { token } = req.cookies;
+    const payload = jwt.decode(token);
+    await redisClient.set(`token:${token}`, "blocked");
+    await redisClient.expireAt(`token:${token}`, payload.exp)
     res.cookie("token", null, { expires: new Date(Date.now()) });
     res.send("logged out successfully");
 })

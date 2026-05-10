@@ -1,13 +1,22 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const redisClient = require('../config/redis');
+
+
+
+
 async function authValidation(req, res, next) {
 
     try {
         const { token } = req.cookies;
         if (!token) throw new Error("token is not present you need to login again");
-        const isAllowed = jwt.verify(token, "$foobar$");
-        if (isAllowed?._id) {
-            const user = await User.findById(isAllowed._id);
+
+        const isBlockedToken = await redisClient.exists(`token:${token}`);
+        if (isBlockedToken) throw new Error("token is blocked please login again")
+
+        const payload = jwt.verify(token, "$foobar$");
+        if (payload?._id) {
+            const user = await User.findById(payload._id);
             if (!user) throw new Error("user is not present in database");
             req.user = user;
             next();
