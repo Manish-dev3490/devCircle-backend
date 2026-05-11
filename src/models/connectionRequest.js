@@ -2,11 +2,11 @@ const mongoose = require('mongoose');
 
 const connectionRequestSchema = new mongoose.Schema({
     fromUserId: {
-        type: mongoose.Types.ObjectId.isValid,
+        type: mongoose.Types.ObjectId,
         required: true
     },
     toUserId: {
-        type: mongoose.Types.ObjectId.isValid,
+        type: mongoose.Types.ObjectId,
         required: true
     },
     status: {
@@ -18,7 +18,7 @@ const connectionRequestSchema = new mongoose.Schema({
         }
     }
 
-})
+},{timestamps:true})
 
 
 const ConnectionRequestModel = new mongoose.model("Connectionrequest", connectionRequestSchema);

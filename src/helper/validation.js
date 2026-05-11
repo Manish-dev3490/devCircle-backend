@@ -1,5 +1,6 @@
 const validator = require('validator');
 const User = require('../models/user')
+const mongoose = require('mongoose')
 
 async function validateSignUpAPI(req) {
 
@@ -131,8 +132,32 @@ async function validateProfileEditApi(req) {
 }
 
 
+async function sendConnectionApi(req) {
+
+    const fromUserId = req.user._id;
+    const toUserId = req.params.toUserId;
+    const status = req.params.status;
+
+
+    if (!mongoose.Types.ObjectId.isValid(fromUserId)) throw new Error("fromuserId id is not valid");
+    if (!mongoose.Types.ObjectId.isValid(toUserId)) throw new Error("toUserId id is not valid");
+
+    if (fromUserId == toUserId) throw new Error(`${req.user.firstName} you are not allowed to send request to youserlf`);
+
+    const allowedStatus = ["intrested", "ignored"];
+    if (!allowedStatus.includes(status)) throw new Error("status is not valid");
+
+    const isToUserExistInDb = await User.findById(toUserId);
+    if (isToUserExistInDb === null) throw new Error(`${req.user.firstName} your are sending request to invalid user`);
+    req.toUser=isToUserExistInDb;
+
+
+}
+
+
 module.exports = {
     validateSignUpAPI,
     validateLoginAPI,
-    validateProfileEditApi
+    validateProfileEditApi,
+    sendConnectionApi
 }

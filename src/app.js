@@ -5,6 +5,7 @@ const app = express();
 const authRouter = require('./routes/authRouter')
 const profileRouter = require('./routes/profileRouter')
 const redisClient = require('./config/redis');
+const connectionRequestRouter=require('./routes/request')
 
 
 
@@ -13,6 +14,7 @@ app.use(express.json());
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
+app.use("/",connectionRequestRouter)
 
 
 
