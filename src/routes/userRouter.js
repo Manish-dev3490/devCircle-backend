@@ -1,6 +1,7 @@
 const express = require("express");
 const authValidation = require("../middlewares/auth");
 const ConnectionRequestModel = require("../models/connectionRequest");
+const User = require("../models/user");
 const userRouter = express.Router();
 const usersafeData = ["firstName", "lastName", "age", "photo"]
 
@@ -45,4 +46,35 @@ userRouter.get("/user/connections", authValidation, async (req, res) => {
 
 })
 
+
+// api to see feed 
+userRouter.get("/user/feed", authValidation, async (req, res) => {
+    try {
+        const loggedInUser = req.user._id;
+        const hideTheseUsers = await ConnectionRequestModel.find({
+            $or: [{ fromUserId: loggedInUser }, { toUserId: loggedInUser }]
+        }).select("fromUserId toUserId status");
+
+
+
+        const notShownInFeed = new Set();
+        hideTheseUsers.forEach((user) => {
+            notShownInFeed.add(user.fromUserId.toString());
+            notShownInFeed.add(user.toUserId.toString());
+
+        })
+
+        notShownInFeed.add(loggedInUser.toString());
+
+        const finalNotShownUsers=await User.find({
+            _id:{$nin:Array.from(notShownInFeed)}
+        }).select(usersafeData)
+
+
+        res.send(finalNotShownUsers)
+    }
+    catch (error) {
+        res.status(500).send("Something went wrong "+error.message)
+    }
+})
 module.exports = userRouter;
