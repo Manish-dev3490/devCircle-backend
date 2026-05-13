@@ -50,31 +50,49 @@ userRouter.get("/user/connections", authValidation, async (req, res) => {
 // api to see feed 
 userRouter.get("/user/feed", authValidation, async (req, res) => {
     try {
+
         const loggedInUser = req.user._id;
+
+        // pagination
+        const page = parseInt(req.query.page) || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+
+        const skip = (page - 1) * limit;
+
         const hideTheseUsers = await ConnectionRequestModel.find({
-            $or: [{ fromUserId: loggedInUser }, { toUserId: loggedInUser }]
+            $or: [
+                { fromUserId: loggedInUser },
+                { toUserId: loggedInUser }
+            ]
         }).select("fromUserId toUserId status");
 
 
 
         const notShownInFeed = new Set();
+
         hideTheseUsers.forEach((user) => {
             notShownInFeed.add(user.fromUserId.toString());
             notShownInFeed.add(user.toUserId.toString());
-
-        })
+        });
 
         notShownInFeed.add(loggedInUser.toString());
 
-        const finalNotShownUsers=await User.find({
-            _id:{$nin:Array.from(notShownInFeed)}
-        }).select(usersafeData)
 
 
-        res.send(finalNotShownUsers)
+        const finalNotShownUsers = await User.find({
+            _id: { $nin: Array.from(notShownInFeed) }
+        })
+            .select(usersafeData)
+            .skip(skip)
+            .limit(limit);
+
+
+
+        res.send(finalNotShownUsers);
+
     }
     catch (error) {
-        res.status(500).send("Something went wrong "+error.message)
+        res.status(500).send("Something went wrong " + error.message);
     }
-})
+});
 module.exports = userRouter;
