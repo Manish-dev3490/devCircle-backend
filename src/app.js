@@ -5,18 +5,20 @@ const app = express();
 const authRouter = require('./routes/authRouter')
 const profileRouter = require('./routes/profileRouter')
 const redisClient = require('./config/redis');
-const connectionRequestRouter=require('./routes/request')
-const userRouter=require('./routes/userRouter');
-
+const connectionRequestRouter = require('./routes/request')
+const userRouter = require('./routes/userRouter');
+const rateLimmiter = require('./middlewares/rateLimmiter');
 
 
 app.use(cookieParser());
 app.use(express.json());
+app.use(rateLimmiter)
+
 
 app.use("/", authRouter);
 app.use("/", profileRouter);
-app.use("/",connectionRequestRouter)
-app.use("/",userRouter);
+app.use("/", connectionRequestRouter)
+app.use("/", userRouter);
 
 
 
@@ -29,7 +31,7 @@ async function initializeConnection() {
     await redisClient.connect();
     console.log("connected with redis database");
 
-      app.listen(3000, () => {
+    app.listen(3000, () => {
       console.log("server is listening on the port 3000");
     })
 
