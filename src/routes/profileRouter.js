@@ -12,7 +12,7 @@ profileRouter.get("/profile/view", authValidator, async (req, res) => {
   try {
     res.status(200).send(req.user);
   } catch (error) {
-    res.status(401).send("Invalid token");
+    res.status(401).send(" Error Invalid token"+error);
   }
 });
 

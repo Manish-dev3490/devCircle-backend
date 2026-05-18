@@ -9,7 +9,7 @@ async function authValidation(req, res, next) {
 
     try {
         const { token } = req.cookies;
-        if (!token) throw new Error("token is not present you need to login again");
+        if (!token) return res.status(401).send("token is not present you need to login again");
 
         const isBlockedToken = await redisClient.exists(`token:${token}`);
         if (isBlockedToken) throw new Error("token is blocked please login again")
