@@ -98,7 +98,7 @@ async function validateProfileEditApi(req) {
 
     // ✅ age validation
     if (age !== undefined) {
-        if (typeof age !== "number" || age < 18 || age > 70) {
+        if ( age < 18 || age > 70) {
             throw new Error("Please enter a valid age");
         }
     }
