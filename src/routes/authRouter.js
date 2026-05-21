@@ -9,23 +9,35 @@ const jwt = require('jsonwebtoken');
 
 
 
-// post api for signup new user into database
 authRouter.post("/signup", async (req, res) => {
-    try {
-        // validate the data at the api level validation
-        await validate.validateSignUpAPI(req);
+  try {
+    await validate.validateSignUpAPI(req);
 
-        // encrypting the password with bcrypt library
-        const { password } = req.body;
-        const hashPassword = await bcrypt.hash(password, 10);
-        req.body.password = hashPassword;
+    const { password } = req.body;
 
-        // creating the new client 
-        const newClient = User.create(req.body);
-        res.status(201).send("User created successfully");
-    } catch (error) {
-        res.status(400).send(error.message);
-    }
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    req.body.password = hashPassword;
+
+    // IMPORTANT
+    const newClient = await User.create(req.body);
+
+    const token = await newClient.getJwt();
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      sameSite: "lax",
+    });
+
+    res.status(201).json({
+      message: "User created successfully",
+      data: newClient,
+    });
+
+  } catch (error) {
+  console.log("Status ->", error?.response?.status);
+  console.log("Backend Error ->", error?.response?.data);
+}
 });
 
 
