@@ -78,7 +78,7 @@ userSchema.methods.getJwt = async function () {
 
     const token = jsonwebtoken.sign(
         { _id: user._id },
-        "$foobar$",
+        $`${process.env.JWT_SECRET_KEY}`,
         {
             expiresIn: "3d"
         }

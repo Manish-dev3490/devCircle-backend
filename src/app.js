@@ -1,4 +1,12 @@
+const path = require("path");
+
+const result = require("dotenv").config({
+  path: path.resolve(__dirname, "../.env"),
+});
+
+
 const express = require("express");
+
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
 const app = express();
@@ -8,12 +16,13 @@ const redisClient = require('./config/redis');
 const connectionRequestRouter = require('./routes/request')
 const userRouter = require('./routes/userRouter');
 const rateLimmiter = require('./middlewares/rateLimmiter');
-const cors=require('cors')
+const cors = require('cors')
+
 
 
 app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
+  origin: "http://localhost:5173",
+  credentials: true
 }));
 app.use(cookieParser());
 app.use(express.json());
@@ -36,7 +45,7 @@ async function initializeConnection() {
     await redisClient.connect();
     console.log("connected with redis database");
 
-    app.listen(3000, () => {
+    app.listen(process.env.PORT, () => {
       console.log("server is listening on the port 3000");
     })
 
