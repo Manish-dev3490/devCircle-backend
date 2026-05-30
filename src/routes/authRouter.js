@@ -35,8 +35,7 @@ authRouter.post("/signup", async (req, res) => {
     });
 
   } catch (error) {
-  console.log("Status ->", error?.response?.status);
-  console.log("Backend Error ->", error?.response?.data);
+  res.status(400).send("Backend Error" + error.message);
 }
 });
 
@@ -53,26 +52,36 @@ authRouter.post("/login", async (req, res) => {
         if (!user) {
             throw new Error("Invalid credentials");
         }
-
         // compare password
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
             throw new Error("Invalid credentials");
         }
 
+
+        
+    
+        
         else {
+
             const token = await user.getJwt();
+
 
             res.cookie("token", token, {
                 httpOnly: true,
                 sameSite: "lax",
             });
             res.status(200).send(user);
+            
         }
 
 
 
+        
+
     } catch (error) {
+        console.log(error.message);
+        
         res.status(401).send(error.message);
     }
 });

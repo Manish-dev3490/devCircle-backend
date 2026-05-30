@@ -14,7 +14,7 @@ async function authValidation(req, res, next) {
         const isBlockedToken = await redisClient.exists(`token:${token}`);
         if (isBlockedToken) throw new Error("token is blocked please login again")
 
-        const payload = jwt.verify(token, "$foobar$");
+        const payload = jwt.verify(token, process.env.JWT_SECRET_KEY);
         if (payload?._id) {
             const user = await User.findById(payload._id);
             if (!user) throw new Error("user is not present in database");
