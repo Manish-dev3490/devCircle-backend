@@ -10,7 +10,7 @@ async function rateLimmiter(req, res, next) {
             await redisClient.expire(ip,3600);
         }
 
-        else if (numberOfRequest > 6000) throw new Error("Too many request ");
+        else if (numberOfRequest > 60) throw new Error("Too many request ");
 
         next();
     }
