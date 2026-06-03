@@ -16,7 +16,8 @@ const redisClient = require('./config/redis');
 const connectionRequestRouter = require('./routes/request')
 const userRouter = require('./routes/userRouter');
 const rateLimmiter = require('./middlewares/rateLimmiter');
-const cors = require('cors')
+const cors = require('cors');
+const AiRouter = require("./routes/AIrouter");
 
 
 
@@ -33,6 +34,7 @@ app.use("/", authRouter);
 app.use("/", profileRouter);
 app.use("/", connectionRequestRouter)
 app.use("/", userRouter);
+app.use("/",AiRouter)
 
 
 
