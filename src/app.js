@@ -6,40 +6,41 @@ const express = require("express");
 const connectDB = require("./config/database");
 const cookieParser = require("cookie-parser");
 const app = express();
-const authRouter = require('./routes/authRouter')
-const profileRouter = require('./routes/profileRouter')
-const redisClient = require('./config/redis');
-const connectionRequestRouter = require('./routes/request')
-const userRouter = require('./routes/userRouter');
-const rateLimmiter = require('./middlewares/rateLimmiter');
-const cors = require('cors');
+const authRouter = require("./routes/authRouter");
+const profileRouter = require("./routes/profileRouter");
+const redisClient = require("./config/redis");
+const connectionRequestRouter = require("./routes/request");
+const userRouter = require("./routes/userRouter");
+const rateLimmiter = require("./middlewares/rateLimmiter");
+const cors = require("cors");
 const AiRouter = require("./routes/AIrouter");
-const http=require('http');
+const http = require("http");
 const initializeSocket = require("./helper/socket");
+const chatRouter = require("./routes/chatRouter");
 
-
-app.use(cors({
-  origin: "http://localhost:5173",
-  credentials: true
-}));
-
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  }),
+);
 
 app.use(cookieParser());
 app.use(express.json());
-app.use(rateLimmiter)
+app.use(rateLimmiter);
 
 // all the routers are present hre
 app.use("/", authRouter);
 app.use("/", profileRouter);
-app.use("/", connectionRequestRouter)
+app.use("/", connectionRequestRouter);
 app.use("/", userRouter);
-app.use("/",AiRouter)
+app.use("/", AiRouter);
+app.use("/", chatRouter);
 
-const server=http.createServer(app);
-initializeSocket(server)
+const server = http.createServer(app);
+initializeSocket(server);
 
 async function initializeConnection() {
-
   try {
     await connectDB();
     console.log("connected with mongoDb cluster");
@@ -49,12 +50,9 @@ async function initializeConnection() {
 
     server.listen(process.env.PORT, () => {
       console.log("server is listening on the port 3000");
-    })
-
-  }
-  catch (error) {
+    });
+  } catch (error) {
     console.log("something went wrong " + error.message);
-
   }
 }
 
