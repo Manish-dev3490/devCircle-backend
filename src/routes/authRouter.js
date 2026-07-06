@@ -10,33 +10,34 @@ const jwt = require('jsonwebtoken');
 
 
 authRouter.post("/signup", async (req, res) => {
-  try {
-    await validate.validateSignUpAPI(req);
+    try {
+        await validate.validateSignUpAPI(req);
 
-    const { password } = req.body;
+        const { password } = req.body;
 
-    const hashPassword = await bcrypt.hash(password, 10);
+        const hashPassword = await bcrypt.hash(password, 10);
 
-    req.body.password = hashPassword;
+        req.body.password = hashPassword;
 
-    // IMPORTANT
-    const newClient = await User.create(req.body);
+        // IMPORTANT
+        const newClient = await User.create(req.body);
 
-    const token = await newClient.getJwt();
+        const token = await newClient.getJwt();
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: "lax",
-    });
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
 
-    res.status(201).json({
-      message: "User created successfully",
-      data: newClient,
-    });
+        res.status(201).json({
+            message: "User created successfully",
+            data: newClient,
+        });
 
-  } catch (error) {
-  res.status(400).send("Backend Error" + error.message);
-}
+    } catch (error) {
+        res.status(400).send("Backend Error" + error.message);
+    }
 });
 
 
@@ -59,9 +60,9 @@ authRouter.post("/login", async (req, res) => {
         }
 
 
-        
-    
-        
+
+
+
         else {
 
             const token = await user.getJwt();
@@ -69,19 +70,20 @@ authRouter.post("/login", async (req, res) => {
 
             res.cookie("token", token, {
                 httpOnly: true,
-                sameSite: "lax",
+                secure: true,
+                sameSite: "none",
             });
             res.status(200).send(user);
-            
+
         }
 
 
 
-        
+
 
     } catch (error) {
         console.log(error.message);
-        
+
         res.status(401).send(error.message);
     }
 });
