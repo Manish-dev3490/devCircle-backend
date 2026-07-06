@@ -20,7 +20,7 @@ const chatRouter = require("./routes/chatRouter");
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.client_URL,
     credentials: true,
   }),
 );
