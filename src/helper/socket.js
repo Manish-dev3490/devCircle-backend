@@ -7,7 +7,7 @@ const ConnectionRequestModel = require("../models/connectionRequest");
 const initializeSocket = (server) => {
     const io = socket(server, {
         cors: {
-            origin: "http://localhost:5173",
+            origin: process.env.client_URL,
             credentials: true
         },
     })
@@ -47,7 +47,7 @@ const initializeSocket = (server) => {
         socket.on("join-chat", async ({ firstName, firstUserId, toUserId }) => {
             try {
 
-
+                
 
                 const connection = await ConnectionRequestModel.findOne({
                     status: "accepted",

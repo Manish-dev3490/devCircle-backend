@@ -2,6 +2,8 @@ const express = require("express");
 const authValidation = require("../middlewares/auth");
 const chatRouter = express.Router();
 const chatModel = require("../models/chat")
+
+
 chatRouter.get("/chat/:targetUserId", authValidation, async (req, res) => {
     try {
         const userId = req.user._id;
