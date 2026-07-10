@@ -47,7 +47,7 @@ const initializeSocket = (server) => {
         socket.on("join-chat", async ({ firstName, firstUserId, toUserId }) => {
             try {
 
-                
+
 
                 const connection = await ConnectionRequestModel.findOne({
                     status: "accepted",
@@ -110,6 +110,19 @@ const initializeSocket = (server) => {
             }
 
         })
+
+
+        socket.on("typing-message", ({ toUserId, _id, firstName }) => {
+
+            const roomId = [_id, toUserId]
+                .sort()
+                .join("_");
+
+            socket.to(roomId).emit("typing-message", {
+                firstName
+            });
+
+        });
     });
 }
 module.exports = initializeSocket;
