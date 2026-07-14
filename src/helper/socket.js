@@ -85,7 +85,7 @@ const initializeSocket = (server) => {
 
 
         // message ko recive krega yeh event and yaha db mein save karvana hai 
-        socket.on("send-message", async ({ _id, toUserId, firstName, text }) => {
+        socket.on("send-message", async ({ _id, toUserId, firstName, text ,lastName}) => {
             try {
                 console.log(firstName + " is connected and has emitted the event send message and msg is " + text)
                 const roomId = [_id, toUserId].sort().join("_");
@@ -103,7 +103,7 @@ const initializeSocket = (server) => {
 
                 chat.messages.push({ senderId: _id, text });
                 await chat.save();
-                io.to(roomId).emit("new-message", { firstName, text });
+                io.to(roomId).emit("new-message", { firstName, text ,lastName});
             }
             catch (error) {
                 console.log(error.message);
@@ -123,6 +123,21 @@ const initializeSocket = (server) => {
             });
 
         });
+
+
+        socket.on("stop-typing", ({_id, firstName, toUserId }) => {
+
+            const roomId = [_id, toUserId]
+                .sort()
+                .join("_");
+
+
+            socket.to(roomId).emit("stop-typing", {
+                firstName,
+            });
+
+        });
+
     });
 }
 module.exports = initializeSocket;
